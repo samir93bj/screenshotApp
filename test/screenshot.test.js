@@ -5,7 +5,12 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
 
-const { setupBrowserAndPage, captureScreenshot } = require("../src/screenshot");
+const {
+  setupBrowserAndPage,
+  captureScreenshot,
+  validateInputData,
+} = require("../src/screenshot");
+
 const { formatAllowed } = require("../src/constants");
 
 describe("screenshot.js", () => {
@@ -68,6 +73,26 @@ describe("screenshot.js", () => {
         }),
         true
       );
+    });
+  });
+
+  describe("validateInputData", () => {
+    it("should throw an error for an invalid URL", () => {
+      assert.throws(() => {
+        validateInputData("invalid-url", "png");
+      }, /Invalid URL format/);
+    });
+
+    it("should throw an error for an invalid format", () => {
+      assert.throws(() => {
+        validateInputData("https://example.com", "jpgs");
+      }, new Error("Invalid format: jpgs. Only format allowed: png, pdf"));
+    });
+
+    it("should not throw an error for a valid URL and format", () => {
+      assert.doesNotThrow(() => {
+        validateInputData("https://example.com", "png");
+      });
     });
   });
 });

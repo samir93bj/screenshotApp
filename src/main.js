@@ -1,5 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
-const path = require("path");
+const { app, ipcMain } = require("electron");
 const { handleScreenshot } = require("./screenshot");
 const { createWindow, setupAppEvents } = require("./config");
 

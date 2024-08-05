@@ -6,6 +6,37 @@ const path = require("path");
 const { isValidUrl } = require("./utils/validate-url");
 const { formatAllowedDisplay, formatAllowed } = require("./constants");
 
+/**
+ * Handle the screenshot capture process by setting up the browser and page,
+ * capturing the screenshot,
+ * and converting the PNG file to a PDF file if the format is PDF
+ *
+ * @param {Object} event
+ * @param {Object} input
+ * @param {string} input.url
+ * @param {string} input.format
+ * @returns {Promise<string>} The path to the screenshot or PDF file
+ */
+async function handleScreenshot(event, { url, format }) {
+  try {
+    validateInputData(url, format);
+
+    const { browser, page } = await setupBrowserAndPage();
+
+    const pathScreenshot = await captureScreenshot(page, url);
+
+    await browser.close();
+
+    if (formatAllowed[format] === "pdf") {
+      await convertPngToPdf(pathScreenshot);
+    }
+
+    return pathScreenshot;
+  } catch (error) {
+    throw Error(`An error occurred: ${error.message}`);
+  }
+}
+
 async function setupBrowserAndPage() {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -93,39 +124,9 @@ const validateInputData = (pageUrl, format) => {
   }
 };
 
-/**
- * Handle the screenshot capture process by setting up the browser and page,
- * capturing the screenshot,
- * and converting the PNG file to a PDF file if the format is PDF
- *
- * @param {Object} event
- * @param {Object} input
- * @param {string} input.url
- * @param {string} input.format
- * @returns {Promise<string>} The path to the screenshot or PDF file
- */
-async function handleScreenshot(event, { url, format }) {
-  try {
-    validateInputData(url, format);
-
-    const { browser, page } = await setupBrowserAndPage();
-
-    const pathScreenshot = await captureScreenshot(page, url);
-
-    await browser.close();
-
-    if (formatAllowed[format] === "pdf") {
-      await convertPngToPdf(pathScreenshot);
-    }
-
-    return pathScreenshot;
-  } catch (error) {
-    throw Error(`An error occurred: ${error.message}`);
-  }
-}
-
 module.exports = {
   handleScreenshot,
   setupBrowserAndPage,
   captureScreenshot,
+  validateInputData,
 };
