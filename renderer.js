@@ -1,10 +1,13 @@
 const { ipcRenderer, shell } = require("electron");
 
+/**
+ * listen for the "screenshot-captured" event and update the UI with the file path
+ */
 document.getElementById("capture").addEventListener("click", async () => {
   const url = document.getElementById("url").value;
   const format = document.getElementById("format").value;
   const status = document.getElementById("status");
-  const error = document.getElementById("error"); // Asegúrate de obtener el elemento error
+  const error = document.getElementById("error");
 
   status.textContent = "Capturing...";
   error.textContent = "";
