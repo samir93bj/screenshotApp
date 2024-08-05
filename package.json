@@ -1,0 +1,18 @@
+{
+  "name": "screenshotapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron src/main.js",
+    "test": "npm run test"
+  },
+  "author": "Samir Mahmud",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "electron": "^31.3.1",
+    "imagemagick-cli": "^0.5.0",
+    "pdfkit": "^0.15.0",
+    "puppeteer": "^22.15.0"
+  }
+}
