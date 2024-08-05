@@ -4,7 +4,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron src/main.js",
-    "test": "mocha"
+    "test": "nyc mocha"
   },
   "author": "Samir Mahmud",
   "license": "MIT",
@@ -16,7 +16,9 @@
     "puppeteer": "^22.15.0"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-babel": "^3.0.0",
     "mocha": "^10.7.0",
+    "nyc": "^17.0.0",
     "sinon": "^18.0.0"
   }
 }
