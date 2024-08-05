@@ -124,4 +124,8 @@ async function handleScreenshot(event, { url, format }) {
   }
 }
 
-module.exports = { handleScreenshot };
+module.exports = {
+  handleScreenshot,
+  setupBrowserAndPage,
+  captureScreenshot,
+};
