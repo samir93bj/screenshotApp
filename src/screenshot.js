@@ -1,10 +1,10 @@
-const puppeteer = require("puppeteer");
-const PDFDocument = require("pdfkit");
-const fs = require("fs");
-const path = require("path");
+const puppeteer = require('puppeteer');
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
 
-const { isValidUrl } = require("./utils/validate-url");
-const { formatAllowedDisplay, formatAllowed } = require("./constants");
+const { isValidUrl } = require('./utils/validate-url');
+const { formatAllowedDisplay, formatAllowed } = require('./constants');
 
 /**
  * Handle the screenshot capture process by setting up the browser and page,
@@ -27,7 +27,7 @@ async function handleScreenshot(event, { url, format }) {
 
     await browser.close();
 
-    if (formatAllowed[format] === "pdf") {
+    if (formatAllowed[format] === 'pdf') {
       await convertPngToPdf(pathScreenshot);
     }
 
@@ -55,11 +55,11 @@ async function setupBrowserAndPage() {
  * @returns {Promise<string>} The path to the screenshot file
  */
 async function captureScreenshot(page, pageUrl) {
-  await page.goto(pageUrl, { waitUntil: "networkidle2" });
+  await page.goto(pageUrl, { waitUntil: 'networkidle2' });
 
   const fileName = `screenshot-${Date.now()}.${formatAllowed.PNG}`;
 
-  const pathScreenshot = path.join(__dirname, "screenshot", fileName);
+  const pathScreenshot = path.join(__dirname, 'screenshot', fileName);
 
   await page.screenshot({
     path: pathScreenshot,
@@ -78,19 +78,19 @@ async function captureScreenshot(page, pageUrl) {
  * @returns {Promise<string>} The path to the PDF file
  */
 async function convertPngToPdf(pngPath) {
-  const pdfPath = pngPath.replace(".png", ".pdf");
-  const doc = new PDFDocument({ size: "A4" });
+  const pdfPath = pngPath.replace('.png', '.pdf');
+  const doc = new PDFDocument({ size: 'A4' });
   const writeStream = fs.createWriteStream(pdfPath);
   doc.pipe(writeStream);
   doc.image(pngPath, 0, 0, { fit: [595.28, 841.89] });
   doc.end();
 
   return new Promise((resolve, reject) => {
-    writeStream.on("error", (error) => {
+    writeStream.on('error', (error) => {
       reject(new Error(`Error converting PNG to PDF: ${error.message}`));
     });
 
-    writeStream.on("finish", async () => {
+    writeStream.on('finish', async () => {
       fs.unlink(pngPath, (error) => {
         if (error) {
           reject(new Error(`Error deleting PNG file: ${error.message}`));
@@ -112,13 +112,13 @@ async function convertPngToPdf(pngPath) {
  */
 const validateInputData = (pageUrl, format) => {
   if (!isValidUrl(pageUrl)) {
-    throw new Error("Invalid URL format");
+    throw new Error('Invalid URL format');
   }
 
   if (!formatAllowed[format]) {
     throw new Error(
       `Invalid format: ${format}. Only format allowed: ${formatAllowedDisplay.join(
-        ", "
+        ', '
       )}`
     );
   }

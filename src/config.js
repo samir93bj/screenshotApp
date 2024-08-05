@@ -1,5 +1,5 @@
-const { BrowserWindow } = require("electron");
-const path = require("path");
+const { BrowserWindow } = require('electron');
+const path = require('path');
 
 /**
  * Create a new BrowserWindow instance and load the index.html file
@@ -9,13 +9,13 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, "../index.html"));
+  mainWindow.loadFile(path.join(__dirname, '../index.html'));
 }
 
 /**
@@ -24,7 +24,7 @@ function createWindow() {
  * @returns {void}
  */
 function setupAppEvents(app) {
-  app.on("activate", () => {
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }

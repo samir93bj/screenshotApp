@@ -1,6 +1,6 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld("electron", {
+contextBridge.exposeInMainWorld('electron', {
   takeScreenshot: (url, format) =>
-    ipcRenderer.invoke("take-screenshot", { url, format }),
+    ipcRenderer.invoke('take-screenshot', { url, format }),
 });
