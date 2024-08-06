@@ -6,6 +6,9 @@ const path = require('path');
 const { isValidUrl } = require('./utils/validate-url');
 const { formatAllowedDisplay, formatAllowed } = require('./constants');
 
+const STORAGE_FOLDER_NAME = 'screenshot';
+const dirPath = path.join(__dirname, STORAGE_FOLDER_NAME);
+
 /**
  * Handle the screenshot capture process by setting up the browser and page,
  * capturing the screenshot,
@@ -19,6 +22,7 @@ const { formatAllowedDisplay, formatAllowed } = require('./constants');
  */
 async function handleScreenshot(event, { url, format }) {
   try {
+    createFolderStorage(dirPath);
     validateInputData(url, format);
 
     const { browser, page } = await setupBrowserAndPage();
@@ -36,6 +40,34 @@ async function handleScreenshot(event, { url, format }) {
     throw Error(`An error occurred: ${error.message}`);
   }
 }
+
+createFolderStorage = (folderName) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+/**
+ * Validate the input data, check if the URL is valid and if the format is allowed
+ *
+ * @param {string} pageUrl
+ * @param {string} format
+ *
+ * @throws {Error} If the URL is invalid or the format is not allowed
+ */
+const validateInputData = (pageUrl, format) => {
+  if (!isValidUrl(pageUrl)) {
+    throw new Error('Invalid URL format');
+  }
+
+  if (!formatAllowed[format]) {
+    throw new Error(
+      `Invalid format: ${format}. Only format allowed: ${formatAllowedDisplay.join(
+        ', '
+      )}`
+    );
+  }
+};
 
 async function setupBrowserAndPage() {
   const browser = await puppeteer.launch();
@@ -57,9 +89,9 @@ async function setupBrowserAndPage() {
 async function captureScreenshot(page, pageUrl) {
   await page.goto(pageUrl, { waitUntil: 'networkidle2' });
 
-  const fileName = `screenshot-${Date.now()}.${formatAllowed.PNG}`;
+  const fileName = `${STORAGE_FOLDER_NAME}-${Date.now()}.${formatAllowed.PNG}`;
 
-  const pathScreenshot = path.join(__dirname, 'screenshot', fileName);
+  const pathScreenshot = path.join(__dirname, STORAGE_FOLDER_NAME, fileName);
 
   await page.screenshot({
     path: pathScreenshot,
@@ -101,28 +133,6 @@ async function convertPngToPdf(pngPath) {
     });
   });
 }
-
-/**
- * Validate the input data, check if the URL is valid and if the format is allowed
- *
- * @param {string} pageUrl
- * @param {string} format
- *
- * @throws {Error} If the URL is invalid or the format is not allowed
- */
-const validateInputData = (pageUrl, format) => {
-  if (!isValidUrl(pageUrl)) {
-    throw new Error('Invalid URL format');
-  }
-
-  if (!formatAllowed[format]) {
-    throw new Error(
-      `Invalid format: ${format}. Only format allowed: ${formatAllowedDisplay.join(
-        ', '
-      )}`
-    );
-  }
-};
 
 module.exports = {
   handleScreenshot,
