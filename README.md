@@ -33,7 +33,7 @@ npm run start
 ## Project Functionality
 You can watch a demonstration video of the project's functionality at the following link:
 
-Watch Video on Loom
+Watch Video on Loom: https://www.loom.com/share/c26171874f044d2097e0066702f8d28c?sid=2198f2fa-d3f4-4d33-91f8-84a86742f10b
 
 ## Video Details
 The video demonstrates the following features:
