@@ -89,7 +89,22 @@ const setupBrowserAndPage = async () => {
  * @returns {Promise<string>} The path to the screenshot file
  */
 const captureScreenshot = async (page, pageUrl) => {
-  await page.goto(pageUrl, { waitUntil: 'networkidle2' });
+  try {
+    await page.goto(pageUrl, {
+      waitUntil: 'networkidle2',
+      timeout: 20000,
+    });
+  } catch (error) {
+    if (error.name === 'TimeoutError') {
+      throw new Error(
+        'The page took too long to load. Please try again later.'
+      );
+    } else {
+      throw new Error(
+        `An error occurred while trying to load the page: ${error.message}`
+      );
+    }
+  }
 
   const fileName = `${STORAGE_FOLDER_NAME}-${Date.now()}.${formatAllowed.PNG}`;
 

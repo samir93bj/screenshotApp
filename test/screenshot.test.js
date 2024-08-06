@@ -37,7 +37,7 @@ describe('screenshot.js', () => {
   });
 
   describe('setupBrowserAndPage', () => {
-    it('should setup browser and page correctly', async () => {
+    it('Should setup browser and page correctly', async () => {
       const { browser, page } = await setupBrowserAndPage();
 
       assert.strictEqual(browserStub.calledOnce, true);
@@ -49,7 +49,7 @@ describe('screenshot.js', () => {
   });
 
   describe('captureScreenshot', () => {
-    it('should capture a screenshot and save it', async () => {
+    it('Should capture a screenshot and save it', async () => {
       const pageUrl = 'http://example.com';
       const fileName = `screenshot-${Date.now()}.${formatAllowed.PNG}`;
       const pathScreenshot = path.join(__dirname, '..', 'screenshot', fileName);
@@ -60,7 +60,10 @@ describe('screenshot.js', () => {
       await captureScreenshot(pageStub, pageUrl);
 
       assert.strictEqual(
-        pageStub.goto.calledOnceWith(pageUrl, { waitUntil: 'networkidle2' }),
+        pageStub.goto.calledOnceWith(pageUrl, {
+          waitUntil: 'networkidle2',
+          timeout: 20000,
+        }),
         true
       );
 
@@ -73,22 +76,51 @@ describe('screenshot.js', () => {
         true
       );
     });
+
+    it('Should throw an error if the page takes too long to load', async () => {
+      pageStub.goto.rejects({ name: 'TimeoutError' });
+
+      try {
+        await captureScreenshot(pageStub, 'http://example.com');
+        assert.fail('Expected error was not thrown');
+      } catch (error) {
+        assert.strictEqual(
+          error.message,
+          'The page took too long to load. Please try again later.'
+        );
+      }
+    });
+
+    it('Should throw an error if an unknown error occurs while loading the page', async () => {
+      const errorMessage = 'Some other error';
+      pageStub.goto.rejects(new Error(errorMessage));
+
+      try {
+        await captureScreenshot(pageStub, 'http://example.com');
+        assert.fail('Expected error was not thrown');
+      } catch (error) {
+        assert.strictEqual(
+          error.message,
+          `An error occurred while trying to load the page: ${errorMessage}`
+        );
+      }
+    });
   });
 
   describe('validateInputData', () => {
-    it('should throw an error for an invalid URL', () => {
+    it('Should throw an error for an invalid URL', () => {
       assert.throws(() => {
         validateInputData('invalid-url', 'png');
       }, /Invalid URL format/);
     });
 
-    it('should throw an error for an invalid format', () => {
+    it('Should throw an error for an invalid format', () => {
       assert.throws(() => {
         validateInputData('https://example.com', 'jpgs');
       }, new Error('Invalid format: jpgs. Only format allowed: png, pdf'));
     });
 
-    it('should not throw an error for a valid URL and format', () => {
+    it('Should not throw an error for a valid URL and format', () => {
       assert.doesNotThrow(() => {
         validateInputData('https://example.com', 'png');
       });
