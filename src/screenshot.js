@@ -7,7 +7,10 @@ const { isValidUrl } = require('./utils/validate-url');
 const { formatAllowedDisplay, formatAllowed } = require('./constants');
 
 const STORAGE_FOLDER_NAME = 'screenshot';
-const dirPath = path.join(__dirname, STORAGE_FOLDER_NAME);
+const DIR_PATH = path.join(__dirname, STORAGE_FOLDER_NAME);
+const PDF_SIZE = 'A4';
+const PDF_DIMENSIONS = [595.28, 841.89];
+const VIEWPORT_DIMENSIONS = { width: 1920, height: 1080 };
 
 /**
  * Handle the screenshot capture process by setting up the browser and page,
@@ -22,7 +25,7 @@ const dirPath = path.join(__dirname, STORAGE_FOLDER_NAME);
  */
 async function handleScreenshot(event, { url, format }) {
   try {
-    createFolderStorage(dirPath);
+    createFolderStorage();
     validateInputData(url, format);
 
     const { browser, page } = await setupBrowserAndPage();
@@ -31,9 +34,8 @@ async function handleScreenshot(event, { url, format }) {
 
     await browser.close();
 
-    if (formatAllowed[format] === 'pdf') {
-      await convertPngToPdf(pathScreenshot);
-    }
+    if (formatAllowed[format] === formatAllowed.PDF)
+      return convertPngToPdf(pathScreenshot);
 
     return pathScreenshot;
   } catch (error) {
@@ -41,9 +43,9 @@ async function handleScreenshot(event, { url, format }) {
   }
 }
 
-createFolderStorage = (folderName) => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+const createFolderStorage = () => {
+  if (!fs.existsSync(DIR_PATH)) {
+    fs.mkdirSync(DIR_PATH, { recursive: true });
   }
 };
 
@@ -69,14 +71,14 @@ const validateInputData = (pageUrl, format) => {
   }
 };
 
-async function setupBrowserAndPage() {
+const setupBrowserAndPage = async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  await page.setViewport({ width: 1920, height: 1080 });
+  await page.setViewport(VIEWPORT_DIMENSIONS);
 
   return { browser, page };
-}
+};
 
 /**
  * Capture a screenshot of the page and save
@@ -86,12 +88,12 @@ async function setupBrowserAndPage() {
  *
  * @returns {Promise<string>} The path to the screenshot file
  */
-async function captureScreenshot(page, pageUrl) {
+const captureScreenshot = async (page, pageUrl) => {
   await page.goto(pageUrl, { waitUntil: 'networkidle2' });
 
   const fileName = `${STORAGE_FOLDER_NAME}-${Date.now()}.${formatAllowed.PNG}`;
 
-  const pathScreenshot = path.join(__dirname, STORAGE_FOLDER_NAME, fileName);
+  const pathScreenshot = path.join(DIR_PATH, fileName);
 
   await page.screenshot({
     path: pathScreenshot,
@@ -100,7 +102,7 @@ async function captureScreenshot(page, pageUrl) {
   });
 
   return pathScreenshot;
-}
+};
 
 /**
  * Convert a PNG file to a PDF file
@@ -109,30 +111,25 @@ async function captureScreenshot(page, pageUrl) {
  *
  * @returns {Promise<string>} The path to the PDF file
  */
-async function convertPngToPdf(pngPath) {
-  const pdfPath = pngPath.replace('.png', '.pdf');
-  const doc = new PDFDocument({ size: 'A4' });
+const convertPngToPdf = async (pngPath) => {
+  const pdfPath = pngPath.replace(formatAllowed.PNG, formatAllowed.PDF);
+  const doc = new PDFDocument({ size: PDF_SIZE });
   const writeStream = fs.createWriteStream(pdfPath);
+
   doc.pipe(writeStream);
-  doc.image(pngPath, 0, 0, { fit: [595.28, 841.89] });
+  doc.image(pngPath, 0, 0, { fit: PDF_DIMENSIONS });
   doc.end();
 
   return new Promise((resolve, reject) => {
+    writeStream.on('finish', () => {
+      fs.unlinkSync(pngPath); // Delete the original PNG file
+      resolve(pdfPath);
+    });
     writeStream.on('error', (error) => {
       reject(new Error(`Error converting PNG to PDF: ${error.message}`));
     });
-
-    writeStream.on('finish', async () => {
-      fs.unlink(pngPath, (error) => {
-        if (error) {
-          reject(new Error(`Error deleting PNG file: ${error.message}`));
-        } else {
-          resolve(pdfPath);
-        }
-      });
-    });
   });
-}
+};
 
 module.exports = {
   handleScreenshot,

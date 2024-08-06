@@ -16,6 +16,7 @@
     "puppeteer": "^22.15.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.25.3",
     "@istanbuljs/nyc-config-babel": "^3.0.0",
     "mocha": "^10.7.0",
     "nyc": "^17.0.0",

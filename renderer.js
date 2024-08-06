@@ -9,8 +9,7 @@ document.getElementById('capture').addEventListener('click', async () => {
   const status = document.getElementById('status');
   const error = document.getElementById('error');
 
-  status.textContent = 'Capturing...';
-  error.textContent = '';
+  updateStatus('Capturing...', '');
 
   try {
     const filePath = await ipcRenderer.invoke('take-screenshot', {
@@ -18,15 +17,32 @@ document.getElementById('capture').addEventListener('click', async () => {
       format,
     });
 
-    status.innerHTML = `Screenshot saved to: <a href="#" id="open-file">${filePath}</a>`;
-
-    document.getElementById('open-file').addEventListener('click', (e) => {
-      e.preventDefault();
-      shell.openPath(filePath);
-    });
+    displayScreenshotPath(filePath);
   } catch (err) {
-    const errorMessage = err.message.split(':').pop().trim();
-    status.textContent = '';
-    error.textContent = `Error: ${errorMessage}`;
+    displayError(err);
   }
 });
+
+const updateStatus = (statusText, errorText) => {
+  const status = document.getElementById('status');
+  const error = document.getElementById('error');
+
+  status.textContent = statusText;
+  error.textContent = errorText;
+};
+
+const displayScreenshotPath = (filePath) => {
+  const status = document.getElementById('status');
+
+  status.innerHTML = `Screenshot saved to: <a href="#" id="open-file">${filePath}</a>`;
+
+  document.getElementById('open-file').addEventListener('click', (e) => {
+    e.preventDefault();
+    shell.openPath(filePath);
+  });
+};
+
+const displayError = (err) => {
+  const errorMessage = err.message.split(':').pop().trim();
+  updateStatus('', `Error: ${errorMessage}`);
+};

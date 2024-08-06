@@ -27,7 +27,7 @@ describe('config.js', () => {
   });
 
   describe('createWindow', () => {
-    it.only('should create a BrowserWindow instance with correct properties', () => {
+    it('should create a BrowserWindow instance with correct properties', () => {
       createWindow();
       assert.deepStrictEqual(BrowserWindowStub.calledOnce, true);
 
