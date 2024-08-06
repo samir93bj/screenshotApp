@@ -2,13 +2,14 @@
   "extends": "@istanbuljs/nyc-config-babel",
   "all": true,
   "include": [
-    "*.js"
+    "src/**/*.js"
   ],
   "reporter": [
     "html",
-    "text",
-    "lcov"
+    "text"
   ],
+  "sourceMap": false,
+  "instrument": false,
   "check-coverage": true,
   "statements": 80,
   "branches": 80,

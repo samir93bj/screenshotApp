@@ -4,7 +4,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron src/main.js",
-    "test": "nyc mocha"
+    "test": "nyc mocha --recursive"
   },
   "author": "Samir Mahmud",
   "license": "MIT",
